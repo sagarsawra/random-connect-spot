@@ -52,6 +52,13 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// RandomTalk custom colors
+				'video-bg': 'hsl(var(--video-bg))',
+				'video-border': 'hsl(var(--video-border))',
+				'chat-bg': 'hsl(var(--chat-bg))',
+				'online': 'hsl(var(--online))',
+				'offline': 'hsl(var(--offline))',
+				'warning': 'hsl(var(--warning))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
