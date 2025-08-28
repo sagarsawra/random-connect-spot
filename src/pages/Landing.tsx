@@ -1,88 +1,113 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Video, Users, Shield, Zap, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroImage from "@/assets/hero-bg.jpg";
+import { useNavigate } from "react-router-dom";
+import { Video, MessageCircle, Shield, Users } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const Landing = () => {
-  const [isDarkMode, setIsDarkMode] = useState(true);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-    document.documentElement.classList.toggle('dark');
-  };
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-screen animate-gradient">
-      {/* Navigation */}
-      <nav className="flex items-center justify-between p-6 relative z-10">
-        <div className="flex items-center space-x-2">
-          <Video className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold gradient-text">RandomTalk</span>
-        </div>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleDarkMode}
-          className="p-2"
-        >
-          {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-        </Button>
-      </nav>
+      <div className="container mx-auto px-4">
+        {/* Navigation */}
+        <nav className="flex items-center justify-between p-6">
+          <h1 className="text-2xl font-bold gradient-text">RandomTalk</h1>
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" className="text-foreground/80 hover:text-foreground">
+              About
+            </Button>
+            <Button variant="ghost" className="text-foreground/80 hover:text-foreground">
+              Safety
+            </Button>
+            {user ? (
+              <div className="flex items-center space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/video-chat')}
+                  className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                >
+                  Chat Now
+                </Button>
+                <Button variant="ghost" onClick={signOut}>
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={() => navigate('/auth')}
+                className="border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+              >
+                Sign In
+              </Button>
+            )}
+          </div>
+        </nav>
 
-      {/* Hero Section */}
-      <main className="flex flex-col items-center justify-center text-center px-6 py-20 relative">
-        <div 
-          className="absolute inset-0 opacity-20 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImage})` }}
-        />
-        
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text">
-            Connect. Chat. Discover.
+        {/* Hero Section */}
+        <main className="flex flex-col items-center justify-center text-center py-20">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 gradient-text animate-fade-in">
+            Connect with Strangers
           </h1>
           
-          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
-            Meet new people instantly through secure video chats. 
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto animate-fade-in">
+            Start random conversations with people around the world. 
             Safe, anonymous, and always exciting.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <Link to="/camera-setup">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-6 animate-glow">
-                <Video className="mr-2 h-6 w-6" />
-                Start Video Chat
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {user ? (
+              <>
+                <Button 
+                  size="lg" 
+                  className="px-8 py-4 text-lg bg-accent hover:bg-accent/90 text-accent-foreground"
+                  onClick={() => navigate("/camera-setup")}
+                >
+                  <Video className="mr-2 h-5 w-5" />
+                  Start Video Chat
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="px-8 py-4 text-lg border-accent text-accent hover:bg-accent hover:text-accent-foreground"
+                  onClick={() => navigate("/video-chat")}
+                >
+                  <MessageCircle className="mr-2 h-5 w-5" />
+                  Text Chat Only
+                </Button>
+              </>
+            ) : (
+              <Button 
+                size="lg" 
+                className="px-8 py-4 text-lg bg-accent hover:bg-accent/90 text-accent-foreground"
+                onClick={() => navigate("/auth")}
+              >
+                Get Started
               </Button>
-            </Link>
-            
-            <Link to="/text-chat">
-              <Button variant="secondary" size="lg" className="text-lg px-8 py-6">
-                <Users className="mr-2 h-6 w-6" />
-                Text Chat Only
-              </Button>
-            </Link>
+            )}
           </div>
 
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-            <div className="text-center space-y-3">
+          {/* Features */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20 max-w-4xl">
+            <div className="text-center space-y-4 animate-fade-in">
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
-                <Zap className="h-8 w-8 text-primary" />
+                <Video className="h-8 w-8 text-primary" />
               </div>
-              <h3 className="text-xl font-semibold">Instant Connections</h3>
-              <p className="text-muted-foreground">Connect with people worldwide in seconds</p>
+              <h3 className="text-xl font-semibold">Instant Video Chat</h3>
+              <p className="text-muted-foreground">Connect face-to-face with people worldwide</p>
             </div>
 
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-4 animate-fade-in">
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
               <h3 className="text-xl font-semibold">Safe & Secure</h3>
-              <p className="text-muted-foreground">Your privacy and safety are our top priority</p>
+              <p className="text-muted-foreground">Built-in moderation and reporting tools</p>
             </div>
 
-            <div className="text-center space-y-3">
+            <div className="text-center space-y-4 animate-fade-in">
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
                 <Users className="h-8 w-8 text-primary" />
               </div>
@@ -90,13 +115,13 @@ const Landing = () => {
               <p className="text-muted-foreground">Meet interesting people from around the globe</p>
             </div>
           </div>
-        </div>
-      </main>
+        </main>
 
-      {/* Footer */}
-      <footer className="text-center py-8 text-muted-foreground relative z-10">
-        <p>&copy; 2024 RandomTalk. Connect responsibly.</p>
-      </footer>
+        {/* Footer */}
+        <footer className="text-center py-8 text-muted-foreground">
+          <p>&copy; 2024 RandomTalk. Connect responsibly.</p>
+        </footer>
+      </div>
     </div>
   );
 };

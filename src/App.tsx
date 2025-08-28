@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import CameraSetup from "./pages/CameraSetup";
 import VideoChat from "./pages/VideoChat";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/auth" element={<Auth />} />
           <Route path="/camera-setup" element={<CameraSetup />} />
           <Route path="/video-chat" element={<VideoChat />} />
           <Route path="/text-chat" element={<VideoChat />} />

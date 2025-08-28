@@ -11,50 +11,59 @@ import {
   X,
   Send,
   Volume2,
-  VolumeX
+  VolumeX,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-
-interface Message {
-  id: string;
-  text: string;
-  sender: 'you' | 'stranger';
-  timestamp: Date;
-}
+import { useAuth } from "@/hooks/useAuth";
+import { useMatchmaking } from "@/hooks/useMatchmaking";
+import { useChat } from "@/hooks/useChat";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 
 const VideoChat = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user, profile, signOut } = useAuth();
+  const { isSearching, currentRoom, partnerProfile, startSearch, nextChat } = useMatchmaking();
+  const { messages, sendMessage, handleTyping, partnerTyping, reportUser } = useChat(currentRoom?.room_id || null);
   
   // Video states
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isSearching, setIsSearching] = useState(true);
   
   // Chat states
   const [showChat, setShowChat] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
   const [messageInput, setMessageInput] = useState("");
+  const [reportReason, setReportReason] = useState("");
+  const [reportDialogOpen, setReportDialogOpen] = useState(false);
   
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    initializeLocalVideo();
-    simulateConnection();
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      initializeLocalVideo();
+    }
     
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [user]);
 
   const initializeLocalVideo = async () => {
     try {
@@ -77,68 +86,48 @@ const VideoChat = () => {
     }
   };
 
-  // Simulate finding a connection
-  const simulateConnection = () => {
-    setTimeout(() => {
-      setIsSearching(false);
-      setIsConnected(true);
-      toast({
-        title: "Connected!",
-        description: "You're now connected with a stranger"
-      });
-      
-      // Add a welcome message from stranger
-      setTimeout(() => {
-        addMessage("Hello! How are you?", "stranger");
-      }, 1000);
-    }, 3000);
-  };
-
-  const addMessage = (text: string, sender: 'you' | 'stranger') => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      sender,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, newMessage]);
-  };
-
-  const sendMessage = () => {
-    if (messageInput.trim()) {
-      addMessage(messageInput, "you");
+  const handleSendMessage = async () => {
+    if (messageInput.trim() && currentRoom) {
+      await sendMessage(messageInput);
       setMessageInput("");
-      
-      // Simulate stranger response
-      setTimeout(() => {
-        const responses = [
-          "That's interesting!",
-          "Tell me more about that",
-          "I agree!",
-          "What do you think about...",
-          "Nice to meet you!"
-        ];
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        addMessage(randomResponse, "stranger");
-      }, 1000 + Math.random() * 2000);
     }
   };
 
-  const nextChat = () => {
-    setIsConnected(false);
-    setIsSearching(true);
-    setMessages([]);
+  const handleReportUser = async () => {
+    if (!partnerProfile || !reportReason.trim()) return;
+
+    const success = await reportUser(partnerProfile.user_id, reportReason);
+    if (success) {
+      toast({
+        title: "User Reported",
+        description: "Thank you for keeping our community safe"
+      });
+      setReportDialogOpen(false);
+      setReportReason("");
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to report user. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleStartSearch = () => {
+    if (!isSearching && !currentRoom) {
+      startSearch();
+      toast({
+        title: "Searching...",
+        description: "Looking for someone to chat with"
+      });
+    }
+  };
+
+  const handleNextChat = () => {
+    nextChat();
     toast({
       title: "Searching...",
       description: "Looking for your next connection"
-    });
-    simulateConnection();
-  };
-
-  const reportUser = () => {
-    toast({
-      title: "User Reported",
-      description: "Thank you for keeping our community safe",
     });
   };
 
@@ -162,19 +151,35 @@ const VideoChat = () => {
     }
   };
 
+  if (!user) return null;
+
+  const isConnected = !!currentRoom;
+
   return (
     <div className="min-h-screen animate-gradient p-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold gradient-text">RandomTalk</h1>
-          <Button
-            variant="outline"
-            onClick={() => navigate("/")}
-            className="text-sm"
-          >
-            Leave Chat
-          </Button>
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold gradient-text">RandomTalk</h1>
+            {profile && (
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <span>{profile.avatar}</span>
+                <span>{profile.nickname}</span>
+              </div>
+            )}
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={signOut}
+              className="text-sm"
+              size="sm"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Sign Out
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -184,13 +189,15 @@ const VideoChat = () => {
             <Card className="bg-card/50 backdrop-blur-sm border-video-border">
               <CardContent className="p-4">
                 <div className="video-panel aspect-video relative">
-                  {isConnected ? (
+                  {isConnected && partnerProfile ? (
                     <>
-                      <video
-                        ref={remoteVideoRef}
-                        className="w-full h-full object-cover"
-                        poster="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQwIiBoZWlnaHQ9IjM2MCIgdmlld0JveD0iMCAwIDY0MCAzNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI2NDAiIGhlaWdodD0iMzYwIiBmaWxsPSIjMUExQTFBIi8+CjxjaXJjbGUgY3g9IjMyMCIgY3k9IjEyMCIgcj0iNDAiIGZpbGw9IiM0QzRDNEMiLz4KPHJlY3QgeD0iMjYwIiB5PSIxODAiIHdpZHRoPSIxMjAiIGhlaWdodD0iODAiIHJ4PSI0MCIgZmlsbD0iIzRDNEM0QyIvPgo8L3N2Zz4K"
-                      />
+                      <div className="flex items-center justify-center h-full bg-video-bg">
+                        <div className="text-center">
+                          <div className="text-6xl mb-4">{partnerProfile.avatar}</div>
+                          <h3 className="text-xl font-semibold mb-2">{partnerProfile.nickname}</h3>
+                          <p className="text-muted-foreground">Connected</p>
+                        </div>
+                      </div>
                       <div className="absolute top-4 right-4 bg-online rounded-full px-3 py-1 text-xs font-medium text-white">
                         Connected
                       </div>
@@ -210,7 +217,10 @@ const VideoChat = () => {
                   ) : (
                     <div className="flex items-center justify-center h-full bg-video-bg">
                       <div className="text-center">
-                        <p className="text-muted-foreground">No connection</p>
+                        <Button onClick={handleStartSearch} size="lg">
+                          Start Chatting
+                        </Button>
+                        <p className="text-muted-foreground mt-2">Click to find someone to chat with</p>
                       </div>
                     </div>
                   )}
@@ -299,7 +309,7 @@ const VideoChat = () => {
                     {/* Action Controls */}
                     <div className="space-y-2">
                       <Button
-                        onClick={nextChat}
+                        onClick={handleNextChat}
                         className="w-full"
                         disabled={!isConnected}
                       >
@@ -307,15 +317,50 @@ const VideoChat = () => {
                         Next Chat
                       </Button>
 
-                      <Button
-                        variant="destructive"
-                        onClick={reportUser}
-                        className="w-full"
-                        disabled={!isConnected}
-                      >
-                        <Flag className="mr-2 h-4 w-4" />
-                        Report
-                      </Button>
+                      <Dialog open={reportDialogOpen} onOpenChange={setReportDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            className="w-full"
+                            disabled={!isConnected}
+                          >
+                            <Flag className="mr-2 h-4 w-4" />
+                            Report
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Report User</DialogTitle>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <p className="text-sm text-muted-foreground">
+                              Please describe why you're reporting this user. Your report helps keep our community safe.
+                            </p>
+                            <Textarea
+                              placeholder="Reason for reporting..."
+                              value={reportReason}
+                              onChange={(e) => setReportReason(e.target.value)}
+                              rows={3}
+                            />
+                            <div className="flex space-x-2">
+                              <Button
+                                onClick={handleReportUser}
+                                disabled={!reportReason.trim()}
+                                className="flex-1"
+                              >
+                                Submit Report
+                              </Button>
+                              <Button
+                                variant="outline"
+                                onClick={() => setReportDialogOpen(false)}
+                                className="flex-1"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </CardContent>
@@ -344,14 +389,24 @@ const VideoChat = () => {
                     <div
                       key={message.id}
                       className={`chat-bubble ${
-                        message.sender === 'you'
+                        message.user_id === user?.id
                           ? 'ml-auto bg-primary text-primary-foreground'
                           : 'mr-auto bg-secondary text-secondary-foreground'
                       }`}
                     >
-                      <p className="text-sm">{message.text}</p>
+                      <div className="flex items-center space-x-2 mb-1">
+                        <span className="text-xs">
+                          {message.profile?.avatar} {message.profile?.nickname || 'Unknown'}
+                        </span>
+                      </div>
+                      <p className="text-sm">{message.content}</p>
                     </div>
                   ))}
+                  {partnerTyping && (
+                    <div className="mr-auto bg-secondary text-secondary-foreground chat-bubble">
+                      <p className="text-sm italic">Typing...</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Message Input */}
@@ -360,11 +415,15 @@ const VideoChat = () => {
                     <Input
                       placeholder="Type a message..."
                       value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                      onChange={(e) => {
+                        setMessageInput(e.target.value);
+                        handleTyping();
+                      }}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      disabled={!isConnected}
                       className="flex-1"
                     />
-                    <Button size="sm" onClick={sendMessage}>
+                    <Button size="sm" onClick={handleSendMessage} disabled={!isConnected}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </div>
