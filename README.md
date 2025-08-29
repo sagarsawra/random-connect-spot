@@ -1,73 +1,78 @@
-# Welcome to your Lovable project
+🚀 Random Talk 🗣️
 
-## Project info
+Tagline: "A Real-time Chat Application Built with React, Supabase, and TailwindCSS"
 
-**URL**: https://lovable.dev/projects/cd27720c-082f-4181-a945-71c8e77c4b04
+📖 Description:
 
-## How can I edit this code?
+Random Talk is a real-time chat application that allows users to connect with each other in real-time. The application is built using React, Supabase, and TailwindCSS. It includes features such as user authentication, real-time messaging, and matchmaking.
 
-There are several ways of editing your application.
+The application is designed to be scalable and performant, using Supabase's real-time database and Pub/Sub messaging system to handle large volumes of user data. The frontend is built using React, with a focus on simplicity and ease of use.
 
-**Use Lovable**
+Features:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cd27720c-082f-4181-a945-71c8e77c4b04) and start prompting.
+1. 📱 Real-time Messaging: Users can send and receive messages in real-time, with support for text, images, and videos.
+2. 🔒 User Authentication: Users can create an account and log in using their email and password.
+3. 👥 Matchmaking: The application includes a matchmaking system that connects users with similar interests and preferences.
+4. 💬 Toast Notifications: The application includes toast notifications that alert users to new messages and updates.
+5. 🎉 Dark Theme: The application includes a dark theme that can be toggled on and off.
+6. 📊 Stats: The application includes statistics on user activity, such as the number of messages sent and received.
+7. 🔒 Encryption: The application uses encryption to protect user data and messages.
+8. 📈 Scalability: The application is designed to scale horizontally, with support for large numbers of users.
 
-Changes made via Lovable will be committed automatically to this repo.
+🧰 Tech Stack:
 
-**Use your preferred IDE**
+| Frontend | Backend | Tools |
+| --- | --- | --- |
+| React | Supabase | Vite, TailwindCSS, ESLint, TypeScript |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Project Structure:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+random-talk/
+client/
+components/
+containers/
+hooks/
+pages/
+public/
+utils/
+vite.config.ts
+postcss.config.js
+use-toast.ts
+useChat.ts
+useMatchmaking.ts
+useAuth.ts
+index.css
+client.ts
+types.ts
+vite-env.d.ts
+package.json
+eslint.config.js
+tailwind.config.ts
 ```
 
-**Edit a file directly in GitHub**
+⚙️ How to Run:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Clone the repository and install dependencies using `npm install` or `yarn install`.
+2. Start the development server using `npm run dev` or `yarn dev`.
+3. Open the application in your web browser at `http://localhost:3000`.
+4. To build the application for production, run `npm run build` or `yarn build`.
 
-**Use GitHub Codespaces**
+🧪 Testing Instructions:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Run `npm test` or `yarn test` to run the test suite.
+2. Use the Jest testing framework to write and run tests for your application.
 
-## What technologies are used for this project?
 
-This project is built with:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
 
-## How can I deploy this project?
+👤 Author:
 
-Simply open [Lovable](https://lovable.dev/projects/cd27720c-082f-4181-a945-71c8e77c4b04) and click on Share -> Publish.
+Sagar Sawra
+sagarsawra94@gmail.com
 
-## Can I connect a custom domain to my Lovable project?
+📝 License:
 
-Yes, you can!
+This project is licensed under the MIT License.
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+I hope this README provides a comprehensive overview of the Random Talk project. If you have any questions or need further assistance, please don't hesitate to reach out! 😊
